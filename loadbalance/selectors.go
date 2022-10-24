@@ -1,8 +1,8 @@
 package loadbalance
 
 import (
-	"aggregator/config"
-	"aggregator/types"
+	"github.com/BlockPILabs/aggregator/config"
+	"github.com/BlockPILabs/aggregator/types"
 	"sync"
 )
 

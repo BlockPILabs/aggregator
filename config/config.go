@@ -1,12 +1,12 @@
 package config
 
 import (
-	"aggregator/log"
-	"aggregator/notify"
-	"aggregator/types"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/BlockPILabs/aggregator/log"
+	"github.com/BlockPILabs/aggregator/notify"
+	"github.com/BlockPILabs/aggregator/types"
 	"github.com/syndtr/goleveldb/leveldb"
 	leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/valyala/fasthttp"

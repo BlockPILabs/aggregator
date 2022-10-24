@@ -1,9 +1,9 @@
 package main
 
 import (
-	"aggregator/cmd/aggregator/commands"
 	"errors"
 	"fmt"
+	"github.com/BlockPILabs/aggregator/cmd/aggregator/commands"
 	"os"
 	"time"
 

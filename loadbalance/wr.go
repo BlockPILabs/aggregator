@@ -1,8 +1,8 @@
 package loadbalance
 
 import (
-	"aggregator/notify"
-	"aggregator/types"
+	"github.com/BlockPILabs/aggregator/notify"
+	"github.com/BlockPILabs/aggregator/types"
 	"math/rand"
 	"sync"
 )

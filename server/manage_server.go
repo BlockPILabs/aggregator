@@ -1,9 +1,9 @@
 package server
 
 import (
-	"aggregator/config"
-	"aggregator/notify"
 	"encoding/json"
+	"github.com/BlockPILabs/aggregator/config"
+	"github.com/BlockPILabs/aggregator/notify"
 	"github.com/fasthttp/router"
 	"github.com/valyala/fasthttp"
 	"net/http"

@@ -1,12 +1,12 @@
 package server
 
 import (
-	"aggregator/config"
-	"aggregator/jsonrpc"
-	"aggregator/loadbalance"
-	"aggregator/log"
-	"aggregator/notify"
 	"fmt"
+	"github.com/BlockPILabs/aggregator/config"
+	"github.com/BlockPILabs/aggregator/jsonrpc"
+	"github.com/BlockPILabs/aggregator/loadbalance"
+	"github.com/BlockPILabs/aggregator/log"
+	"github.com/BlockPILabs/aggregator/notify"
 	"github.com/valyala/fasthttp"
 	//proxy "github.com/yeqown/fasthttp-reverse-proxy/v2"
 	"strings"
