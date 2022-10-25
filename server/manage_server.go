@@ -1,6 +1,8 @@
 package server
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"github.com/BlockPILabs/aggregator/config"
 	"github.com/BlockPILabs/aggregator/notify"
@@ -8,6 +10,8 @@ import (
 	"github.com/valyala/fasthttp"
 	"net/http"
 )
+
+var basicAuthPrefix = []byte("Basic ")
 
 func routeIndex(ctx *fasthttp.RequestCtx) {
 	ctx.WriteString("Welcome!")
@@ -32,7 +36,7 @@ func NewManageServer() error {
 	r.POST("/config", routeUpdateConfig)
 
 	addr := ":8012"
-	logger.Info("Starting aggregator manage server", "addr", addr)
+	logger.Info("Starting management server", "addr", addr)
 	err := fasthttp.ListenAndServe(addr, func(ctx *fasthttp.RequestCtx) {
 		ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
 		ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
@@ -43,7 +47,19 @@ func NewManageServer() error {
 			ctx.SetBodyString("ok")
 			return
 		}
-		r.Handler(ctx)
+
+		auth := ctx.Request.Header.Peek("Authorization")
+		if bytes.HasPrefix(auth, basicAuthPrefix) {
+			payload, err := base64.StdEncoding.DecodeString(string(auth[len(basicAuthPrefix):]))
+			if err == nil {
+				pair := bytes.SplitN(payload, []byte(":"), 2)
+				if len(pair) == 2 && bytes.Equal(pair[0], []byte("blockpi")) && bytes.Equal(pair[1], []byte(config.Config.Password)) {
+					r.Handler(ctx)
+					return
+				}
+			}
+		}
+		ctx.Error("Unauthorized", fasthttp.StatusUnauthorized)
 	})
 	if err != nil {
 		notify.SendError("Error start manage server.", err.Error())

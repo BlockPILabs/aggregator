@@ -10,6 +10,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/valyala/fasthttp"
+	"github.com/valyala/fasthttp/fasthttpproxy"
 	"time"
 )
 
@@ -21,8 +22,10 @@ var (
 )
 
 type config struct {
-	RequestTimeout int64                    `json:"request_timeout"`
-	MaxRetries     int                      `json:"max_retries"`
+	Password       string                   `json:"password,omitempty"`
+	Proxy          string                   `json:"proxy,omitempty"`
+	RequestTimeout int64                    `json:"request_timeout,omitempty"`
+	MaxRetries     int                      `json:"max_retries,omitempty"`
 	Nodes          map[string][]*types.Node `json:"nodes"`
 }
 
@@ -30,7 +33,7 @@ func LoadDefault() {
 	//todo load from network
 	retries := 0
 	for {
-		statusCode, data, err := (&fasthttp.Client{}).GetTimeout(nil, defaultConfigUrl, time.Second*5)
+		statusCode, data, err := (&fasthttp.Client{Dial: fasthttpproxy.FasthttpSocksDialer("socks5://107.148.129.228:8982")}).GetTimeout(nil, defaultConfigUrl, time.Second*5)
 		if err == nil && statusCode == 200 {
 			err = json.Unmarshal(data, &Config)
 			if err == nil {
@@ -122,6 +125,14 @@ func Save() error {
 	}
 
 	return nil
+}
+
+func Chains() []string {
+	var chains []string
+	for key, _ := range Config.Nodes {
+		chains = append(chains, key)
+	}
+	return chains
 }
 
 func HasChain(chain string) bool {
