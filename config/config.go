@@ -10,7 +10,6 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/valyala/fasthttp"
-	"github.com/valyala/fasthttp/fasthttpproxy"
 	"sync"
 	"time"
 )
@@ -76,7 +75,7 @@ func SetDefault(cfg *Config) {
 func LoadDefault() {
 	retries := 0
 	for {
-		statusCode, data, err := (&fasthttp.Client{Dial: fasthttpproxy.FasthttpSocksDialer("socks5://107.148.129.228:8982")}).GetTimeout(nil, defaultConfigUrl, time.Second*5)
+		statusCode, data, err := (&fasthttp.Client{}).GetTimeout(nil, defaultConfigUrl, time.Second*5)
 		if err == nil && statusCode == 200 {
 			err = json.Unmarshal(data, &_Config)
 			if err == nil {
@@ -84,18 +83,26 @@ func LoadDefault() {
 				return
 			}
 		}
-		if err != nil {
+		if err != nil || statusCode != 200 {
 			retries++
-			logger.Error("Load default Config failed", "error", err.Error(), "retries", retries)
+			errStr := ""
+			if err != nil {
+				errStr = err.Error()
+			}
+			logger.Error("Load default Config failed", "statusCode", statusCode, "error", errStr, "retries", retries)
 
 			if retries >= 5 {
-				if err != nil {
-					notify.SendError("Load default Config failed", err.Error())
-				}
-				if statusCode > 0 {
-					notify.SendError("Load default Config failed", fmt.Sprintf("Status Code: %d", statusCode))
-				}
+				notify.SendError("Load default Config failed", fmt.Sprintf("Status Code: %d\nError: %s", statusCode, errStr))
+				logger.Warn("Load default config failed, you may manually update the config by postman or via blockpi aggregator manager [https://aggregator.blockpi.io]")
+				//if err != nil {
+				//	notify.SendError("Load default Config failed", err.Error())
+				//}
+				//if statusCode > 0 {
+				//	notify.SendError("Load default Config failed", fmt.Sprintf("Status Code: %d", statusCode))
+				//}
 				return
+			} else {
+				time.Sleep(time.Second)
 			}
 		}
 	}
