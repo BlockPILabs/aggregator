@@ -3,6 +3,8 @@ package commands
 import (
 	"github.com/BlockPILabs/aggregator/config"
 	"github.com/BlockPILabs/aggregator/loadbalance"
+	"github.com/BlockPILabs/aggregator/middleware"
+	"github.com/BlockPILabs/aggregator/middleware/plugins"
 	"github.com/BlockPILabs/aggregator/server"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/sync/errgroup"
@@ -21,6 +23,13 @@ func RunCommand() *cli.Command {
 
 			config.Load()
 			loadbalance.LoadFromConfig()
+
+			middleware.Append(
+				plugins.NewRequestValidatorMiddleware(),
+				plugins.NewLoadBalanceMiddleware(),
+				plugins.NewHttpProxyMiddleware(),
+			)
+
 			return nil
 		},
 		Action: func(context *cli.Context) error {

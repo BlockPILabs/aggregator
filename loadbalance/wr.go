@@ -9,17 +9,17 @@ import (
 
 // WrSelector weighted-random selector
 type WrSelector struct {
-	nodes     []*types.Node
+	nodes     []types.Node
 	sumWeight int64
 
 	mutex sync.Mutex
 }
 
-func (s *WrSelector) SetNodes(nodes []*types.Node) {
+func (s *WrSelector) SetNodes(nodes []types.Node) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	var nodesSelected []*types.Node
+	var nodesSelected []types.Node
 	var sumWeight int64 = 0
 	for _, node := range nodes {
 		if node.Weight > 0 && len(node.Endpoint) > 0 {
@@ -44,7 +44,7 @@ func (s *WrSelector) NextNode() *types.Node {
 			if !node.Disabled {
 				weight += node.Weight
 				if weight >= w {
-					return node
+					return &node
 				}
 			}
 		}

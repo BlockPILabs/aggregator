@@ -9,7 +9,7 @@ import (
 var _selectors = map[string]*WrSelector{}
 var _mutex sync.Mutex
 
-func SetNodes(chain string, nodes []*types.Node) {
+func SetNodes(chain string, nodes []types.Node) {
 	_mutex.Lock()
 	defer _mutex.Unlock()
 
@@ -31,7 +31,7 @@ func NextNode(chain string) *types.Node {
 }
 
 func LoadFromConfig() {
-	for chain, nodes := range config.Config.Nodes {
+	for chain, nodes := range config.Default().Nodes {
 		SetNodes(chain, nodes)
 	}
 }
