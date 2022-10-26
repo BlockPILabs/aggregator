@@ -42,6 +42,10 @@ func (s *Session) Init() error {
 			s.Chain = strings.Trim(ss[1], " ")
 			s.Request = MustUnmarshalJsonRpcRequest(ctx.Request.Body())
 		}
+
+		if !s.Cfg.HasChain(s.Chain) {
+			return aggregator.ErrInvalidChain
+		}
 	}
 	return nil
 }

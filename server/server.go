@@ -23,6 +23,11 @@ var requestHandler = func(ctx *fasthttp.RequestCtx) {
 	var err error
 
 	session := &rpc.Session{RequestCtx: ctx}
+	err = session.Init()
+	if err != nil {
+		ctx.Error(string(session.NewJsonRpcError(err).Marshal()), fasthttp.StatusOK)
+		return
+	}
 	for {
 		session.Tries++
 		err = middleware.OnRequest(session)

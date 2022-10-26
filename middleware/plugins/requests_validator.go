@@ -31,11 +31,11 @@ func (m *RequestValidatorMiddleware) SetNext(middleware middleware.Middleware) {
 }
 
 func (m *RequestValidatorMiddleware) OnRequest(session *rpc.Session) error {
-	if !session.InitOnce {
-		err := session.Init()
-		logger.Debug("recv new request", "sid", session.SId(), "method", session.RpcMethod())
-		return err
-	}
+	//if !session.InitOnce {
+	//	err := session.Init()
+	//	logger.Debug("recv new request", "sid", session.SId(), "method", session.RpcMethod())
+	//	return err
+	//}
 	return nil
 }
 

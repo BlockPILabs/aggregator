@@ -2,12 +2,16 @@ package loadbalance
 
 import (
 	"github.com/BlockPILabs/aggregator/config"
+	"github.com/BlockPILabs/aggregator/log"
 	"github.com/BlockPILabs/aggregator/types"
 	"sync"
 )
 
-var _selectors = map[string]*WrSelector{}
-var _mutex sync.Mutex
+var (
+	_selectors = map[string]*WrSelector{}
+	_mutex     sync.Mutex
+	logger     = log.Module("load-balance")
+)
 
 func SetNodes(chain string, nodes []types.Node) {
 	_mutex.Lock()
@@ -32,6 +36,7 @@ func NextNode(chain string) *types.Node {
 
 func LoadFromConfig() {
 	for chain, nodes := range config.Default().Nodes {
+		logger.Info("Set LB selectors", "chain", chain, "nodes", len(nodes))
 		SetNodes(chain, nodes)
 	}
 }

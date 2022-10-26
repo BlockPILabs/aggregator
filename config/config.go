@@ -19,7 +19,7 @@ var (
 	logger           = log.Module("Config")
 	defaultConfigUrl = "https://raw.githubusercontent.com/BlockPILabs/chain-specs/dev/aggregator/default-config.json"
 	_DB_CONFIG_KEY   = []byte("Config")
-	_Config          = Config{}
+	_Config          = &Config{Password: "blockpi"}
 
 	locker = sync.Mutex{}
 )
@@ -32,11 +32,22 @@ type Config struct {
 	Nodes          map[string][]types.Node `json:"nodes"`
 }
 
+func (c Config) HasChain(chain string) bool {
+	if len(chain) > 0 {
+		if v, ok := c.Nodes[chain]; ok {
+			if len(v) > 0 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func Clone() Config {
 	locker.Lock()
 	defer locker.Unlock()
 
-	cfg := _Config
+	cfg := *_Config
 	cfg.Nodes = map[string][]types.Node{}
 
 	for key, nodes := range _Config.Nodes {
@@ -48,22 +59,18 @@ func Clone() Config {
 	return cfg
 }
 
-func Default() Config {
+func Default() *Config {
 	locker.Lock()
 	defer locker.Unlock()
 
 	return _Config
 }
 
-func SetDefault(cfg Config) {
+func SetDefault(cfg *Config) {
 	locker.Lock()
 	defer locker.Unlock()
 
 	_Config = cfg
-}
-
-func NewConfig() Config {
-	return Config{}
 }
 
 func LoadDefault() {
@@ -169,15 +176,4 @@ func Chains() []string {
 		chains = append(chains, key)
 	}
 	return chains
-}
-
-func HasChain(chain string) bool {
-	if len(chain) > 0 {
-		if v, ok := Default().Nodes[chain]; ok {
-			if len(v) > 0 {
-				return true
-			}
-		}
-	}
-	return false
 }

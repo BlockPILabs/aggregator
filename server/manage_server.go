@@ -25,14 +25,14 @@ func routeConfig(ctx *fasthttp.RequestCtx) {
 }
 
 func routeUpdateConfig(ctx *fasthttp.RequestCtx) {
-	cfg := config.NewConfig()
-	err := json.Unmarshal(ctx.Request.Body(), cfg)
+	cfg := config.Config{}
+	err := json.Unmarshal(ctx.Request.Body(), &cfg)
 	if err != nil {
 		ctx.Error("error parse config", fasthttp.StatusOK)
 		return
 	}
 
-	config.SetDefault(cfg)
+	config.SetDefault(&cfg)
 	loadbalance.LoadFromConfig()
 
 	//data, _ := json.Marshal(config.Config)
