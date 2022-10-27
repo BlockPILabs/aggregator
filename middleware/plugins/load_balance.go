@@ -18,7 +18,7 @@ func NewLoadBalanceMiddleware() *LoadBalanceMiddleware {
 }
 
 func (m *LoadBalanceMiddleware) Name() string {
-	return "RequestValidatorMiddleware"
+	return "LoadBalanceMiddleware"
 }
 
 func (m *LoadBalanceMiddleware) Enabled() bool {
@@ -38,13 +38,15 @@ func (m *LoadBalanceMiddleware) OnRequest(session *rpc.Session) error {
 	if node == nil {
 		return aggregator.ErrServerError
 	}
-
+	session.NodeName = node.Name
 	logger.Debug("load balance", "sid", session.SId(), "node", node.Name)
-
 	if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
-		ctx.Response.Header.Set("X-Relay-Node", node.Name)
 		ctx.Request.SetRequestURI(node.Endpoint)
 	}
+	return nil
+}
+
+func (m *LoadBalanceMiddleware) OnProcess(session *rpc.Session) error {
 	return nil
 }
 

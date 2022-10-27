@@ -28,6 +28,7 @@ func RunCommand() *cli.Command {
 				plugins.NewRequestValidatorMiddleware(),
 				plugins.NewLoadBalanceMiddleware(),
 				plugins.NewHttpProxyMiddleware(),
+				plugins.NewCorsMiddleware(),
 			)
 
 			return nil

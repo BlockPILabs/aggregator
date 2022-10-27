@@ -39,6 +39,15 @@ var requestHandler = func(ctx *fasthttp.RequestCtx) {
 			continue
 		}
 
+		err = middleware.OnProcess(session)
+		if err != nil {
+			if session.IsMaxRetriesExceeded() {
+				ctx.Error(string(session.NewJsonRpcError(err).Marshal()), fasthttp.StatusOK)
+				return
+			}
+			continue
+		}
+
 		err = middleware.OnResponse(session)
 		if err != nil {
 			if session.IsMaxRetriesExceeded() {

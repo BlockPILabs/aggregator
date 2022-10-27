@@ -23,6 +23,7 @@ type Session struct {
 
 	Tries    int
 	InitOnce bool
+	NodeName string
 }
 
 func (s *Session) Init() error {

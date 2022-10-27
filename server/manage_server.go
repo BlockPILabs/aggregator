@@ -35,9 +35,9 @@ func routeUpdateConfig(ctx *fasthttp.RequestCtx) {
 	config.SetDefault(&cfg)
 	loadbalance.LoadFromConfig()
 
-	//data, _ := json.Marshal(config.Config)
-	//ctx.Response.Header.Set("Content-Type", "application/json")
-	//ctx.Write(data)
+	data, _ := json.Marshal(cfg)
+	ctx.Response.Header.Set("Content-Type", "application/json")
+	ctx.Write(data)
 }
 
 func routeRestoreConfig(ctx *fasthttp.RequestCtx) {

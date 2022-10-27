@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"github.com/BlockPILabs/aggregator/aggregator"
 	"github.com/BlockPILabs/aggregator/log"
 	"github.com/BlockPILabs/aggregator/rpc"
 )
@@ -19,6 +20,7 @@ type Middleware interface {
 	Enabled() bool
 
 	OnRequest(session *rpc.Session) error
+	OnProcess(session *rpc.Session) error
 	OnResponse(session *rpc.Session) error
 }
 
@@ -36,7 +38,24 @@ func OnRequest(session *rpc.Session) error {
 	for _, mw := range middlewareChain {
 		err := mw.OnRequest(session)
 		if err != nil {
-			logger.Error("an error occurred", "sid", session.SId(), "middle", mw.Name(), "error", err)
+			if err == aggregator.ErrMustReturn {
+				return nil
+			}
+			logger.Error("an error occurred", "sid", session.SId(), "middleware", mw.Name(), "error", err)
+			return err
+		}
+	}
+	return nil
+}
+
+func OnProcess(session *rpc.Session) error {
+	for _, mw := range middlewareChain {
+		err := mw.OnProcess(session)
+		if err != nil {
+			if err == aggregator.ErrMustReturn {
+				return nil
+			}
+			logger.Error("an error occurred", "sid", session.SId(), "middleware", mw.Name(), "error", err)
 			return err
 		}
 	}
@@ -47,7 +66,10 @@ func OnResponse(session *rpc.Session) error {
 	for _, mw := range middlewareChain {
 		err := mw.OnResponse(session)
 		if err != nil {
-			logger.Error("an error occurred", "sid", session.SId(), "middle", mw.Name(), "error", err)
+			if err == aggregator.ErrMustReturn {
+				return nil
+			}
+			logger.Error("an error occurred", "sid", session.SId(), "middleware", mw.Name(), "error", err)
 			return err
 		}
 	}

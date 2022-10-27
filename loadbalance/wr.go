@@ -22,11 +22,15 @@ func (s *WrSelector) SetNodes(nodes []types.Node) {
 	var nodesSelected []types.Node
 	var sumWeight int64 = 0
 	for _, node := range nodes {
-		if node.Weight > 0 && len(node.Endpoint) > 0 {
-			sumWeight += node.Weight
-			nodesSelected = append(nodesSelected, node)
+		if !node.Disabled {
+			if node.Weight > 0 && len(node.Endpoint) > 0 {
+				sumWeight += node.Weight
+				nodesSelected = append(nodesSelected, node)
+			} else {
+				notify.SendError("load balance: node is not selected", node.Name, node.Endpoint)
+			}
 		} else {
-			notify.SendError("load balance: node is not selected", node.Name, node.Endpoint)
+			logger.Warn("Node is disabled", "node", node.Name, "endpoint", node.Endpoint)
 		}
 	}
 	s.nodes = nodesSelected
@@ -41,12 +45,12 @@ func (s *WrSelector) NextNode() *types.Node {
 		w := rand.Int63n(s.sumWeight)
 		var weight int64 = 0
 		for _, node := range s.nodes {
-			if !node.Disabled {
-				weight += node.Weight
-				if weight >= w {
-					return &node
-				}
+			//if !node.Disabled {
+			weight += node.Weight
+			if weight >= w {
+				return &node
 			}
+			//}
 		}
 	}
 	return nil

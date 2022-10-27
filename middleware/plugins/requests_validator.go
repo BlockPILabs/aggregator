@@ -1,8 +1,10 @@
 package plugins
 
 import (
+	"github.com/BlockPILabs/aggregator/aggregator"
 	"github.com/BlockPILabs/aggregator/middleware"
 	"github.com/BlockPILabs/aggregator/rpc"
+	"github.com/valyala/fasthttp"
 )
 
 type RequestValidatorMiddleware struct {
@@ -36,6 +38,27 @@ func (m *RequestValidatorMiddleware) OnRequest(session *rpc.Session) error {
 	//	logger.Debug("recv new request", "sid", session.SId(), "method", session.RpcMethod())
 	//	return err
 	//}
+	if session.Method == "OPTIONS" {
+		return aggregator.ErrMustReturn
+	}
+
+	if session.Method != "POST" {
+		return aggregator.ErrInvalidMethod
+	}
+
+	session.RpcMethod()
+
+	return nil
+}
+
+func (m *RequestValidatorMiddleware) OnProcess(session *rpc.Session) error {
+	if session.Method == "OPTIONS" {
+		if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
+			ctx.Error("ok", fasthttp.StatusOK)
+		}
+
+		return aggregator.ErrMustReturn
+	}
 	return nil
 }
 
