@@ -69,7 +69,12 @@ func NewServer() error {
 		logger.Info("Registered RPC", "endpoint", "http://localhost:8011/"+chain)
 	}
 
-	err = fasthttp.ListenAndServe(addr, requestHandler)
+	s := &fasthttp.Server{
+		Handler:            fasthttp.CompressHandlerLevel(requestHandler, 6),
+		MaxRequestBodySize: fasthttp.DefaultMaxRequestBodySize * 10,
+	}
+
+	err = s.ListenAndServe(addr)
 	if err != nil {
 		notify.SendError("Error start aggregator server.", err.Error())
 		return err

@@ -20,7 +20,8 @@ func NewError(code int, msg string) *Error {
 var (
 	ErrServerError    = NewError(-32000, "server error")
 	ErrInvalidRequest = NewError(-32600, "invalid request")
-	ErrInvalidMethod  = NewError(-32600, "invalid method")
+	ErrInvalidMethod  = NewError(-32601, "invalid method")
 	ErrInvalidChain   = NewError(-32601, "invalid chain")
 	ErrMustReturn     = NewError(10000, "must return")
+	ErrDenyRequest    = NewError(-32602, "deny request")
 )

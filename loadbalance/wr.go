@@ -1,25 +1,25 @@
 package loadbalance
 
 import (
+	"github.com/BlockPILabs/aggregator/aggregator"
 	"github.com/BlockPILabs/aggregator/notify"
-	"github.com/BlockPILabs/aggregator/types"
 	"math/rand"
 	"sync"
 )
 
 // WrSelector weighted-random selector
 type WrSelector struct {
-	nodes     []types.Node
+	nodes     []aggregator.Node
 	sumWeight int64
 
 	mutex sync.Mutex
 }
 
-func (s *WrSelector) SetNodes(nodes []types.Node) {
+func (s *WrSelector) SetNodes(nodes []aggregator.Node) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
-	var nodesSelected []types.Node
+	var nodesSelected []aggregator.Node
 	var sumWeight int64 = 0
 	for _, node := range nodes {
 		if !node.Disabled {
@@ -37,7 +37,7 @@ func (s *WrSelector) SetNodes(nodes []types.Node) {
 	s.sumWeight = sumWeight
 }
 
-func (s *WrSelector) NextNode() *types.Node {
+func (s *WrSelector) NextNode() *aggregator.Node {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 

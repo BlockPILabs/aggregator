@@ -26,6 +26,7 @@ func RunCommand() *cli.Command {
 
 			middleware.Append(
 				plugins.NewRequestValidatorMiddleware(),
+				plugins.NewSafetyMiddleware(),
 				plugins.NewLoadBalanceMiddleware(),
 				plugins.NewHttpProxyMiddleware(),
 				plugins.NewCorsMiddleware(),

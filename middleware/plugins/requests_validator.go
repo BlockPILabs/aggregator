@@ -5,6 +5,13 @@ import (
 	"github.com/BlockPILabs/aggregator/middleware"
 	"github.com/BlockPILabs/aggregator/rpc"
 	"github.com/valyala/fasthttp"
+	"strings"
+)
+
+var (
+	defaultWriteMethods = []string{
+		"_call", "_sendRawTransaction", "_sendTransaction", "_sendTransactionAsFeePayer",
+	}
 )
 
 type RequestValidatorMiddleware struct {
@@ -33,20 +40,15 @@ func (m *RequestValidatorMiddleware) SetNext(middleware middleware.Middleware) {
 }
 
 func (m *RequestValidatorMiddleware) OnRequest(session *rpc.Session) error {
-	//if !session.InitOnce {
-	//	err := session.Init()
-	//	logger.Debug("recv new request", "sid", session.SId(), "method", session.RpcMethod())
-	//	return err
-	//}
 	if session.Method == "OPTIONS" {
 		return aggregator.ErrMustReturn
 	}
 
-	if session.Method != "POST" {
-		return aggregator.ErrInvalidMethod
-	}
+	//if session.Method != "POST" {
+	//	return aggregator.ErrInvalidMethod
+	//}
 
-	session.RpcMethod()
+	session.IsWriteRpcMethod = m.isWriteMethod(session.RpcMethod())
 
 	return nil
 }
@@ -64,4 +66,15 @@ func (m *RequestValidatorMiddleware) OnProcess(session *rpc.Session) error {
 
 func (m *RequestValidatorMiddleware) OnResponse(session *rpc.Session) error {
 	return nil
+}
+
+func (m *RequestValidatorMiddleware) isWriteMethod(method string) bool {
+	if len(method) > 0 {
+		for _, m := range defaultWriteMethods {
+			if strings.HasSuffix(strings.ToLower(method), strings.ToLower(m)) {
+				return true
+			}
+		}
+	}
+	return false
 }

@@ -6,12 +6,14 @@ import (
 	"github.com/BlockPILabs/aggregator/config"
 	"github.com/valyala/fasthttp"
 	"strings"
+	"sync"
 	"sync/atomic"
 )
 
 var _id int64 = 0
 
 type Session struct {
+	once       sync.Once
 	sId        any
 	RequestCtx any
 	Method     string
@@ -21,14 +23,15 @@ type Session struct {
 	RawRequest []byte
 	Cfg        config.Config
 
-	Tries    int
-	InitOnce bool
-	NodeName string
+	Tries            int
+	NodeName         string
+	IsWriteRpcMethod bool
 }
 
 func (s *Session) Init() error {
-	if !s.InitOnce {
-		s.InitOnce = true
+	var err error
+
+	s.once.Do(func() {
 		s.sId = atomic.AddInt64(&_id, 1)
 		s.Cfg = config.Clone()
 		if ctx, ok := s.RequestCtx.(*fasthttp.RequestCtx); ok {
@@ -38,17 +41,20 @@ func (s *Session) Init() error {
 
 			ss := strings.Split(s.Path, "/")
 			if len(ss) != 2 {
-				return aggregator.ErrInvalidRequest
+				err = aggregator.ErrInvalidRequest
+				return
 			}
 			s.Chain = strings.Trim(ss[1], " ")
 			s.Request = MustUnmarshalJsonRpcRequest(ctx.Request.Body())
 		}
 
 		if !s.Cfg.HasChain(s.Chain) {
-			return aggregator.ErrInvalidChain
+			err = aggregator.ErrInvalidChain
+			return
 		}
-	}
-	return nil
+	})
+
+	return err
 }
 
 func (s *Session) SId() string {
@@ -72,6 +78,13 @@ func (s *Session) RpcMethod() string {
 		return s.Request.Method
 	}
 	return ""
+}
+
+func (s *Session) RpcParams() interface{} {
+	if s.Request != nil {
+		return s.Request.Params
+	}
+	return nil
 }
 
 func (s *Session) NewJsonRpcError(err error) *JsonRpcResponse {

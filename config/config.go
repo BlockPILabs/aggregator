@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/BlockPILabs/aggregator/aggregator"
 	"github.com/BlockPILabs/aggregator/log"
 	"github.com/BlockPILabs/aggregator/notify"
-	"github.com/BlockPILabs/aggregator/types"
 	"github.com/syndtr/goleveldb/leveldb"
 	leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/valyala/fasthttp"
@@ -15,20 +15,19 @@ import (
 )
 
 var (
-	logger           = log.Module("Config")
+	logger           = log.Module("config")
 	defaultConfigUrl = "https://raw.githubusercontent.com/BlockPILabs/chain-specs/dev/aggregator/default-config.json"
-	_DB_CONFIG_KEY   = []byte("Config")
-	_Config          = &Config{Password: "blockpi"}
+	_Config          = &Config{Password: "blockpi", RequestTimeout: 30, MaxRetries: 3}
 
 	locker = sync.Mutex{}
 )
 
 type Config struct {
-	Password       string                  `json:"password,omitempty"`
-	Proxy          string                  `json:"proxy,omitempty"`
-	RequestTimeout int64                   `json:"request_timeout,omitempty"`
-	MaxRetries     int                     `json:"max_retries,omitempty"`
-	Nodes          map[string][]types.Node `json:"nodes"`
+	Password       string                       `json:"password,omitempty"`
+	Proxy          string                       `json:"proxy,omitempty"`
+	RequestTimeout int64                        `json:"request_timeout,omitempty"`
+	MaxRetries     int                          `json:"max_retries,omitempty"`
+	Nodes          map[string][]aggregator.Node `json:"nodes"`
 }
 
 func (c Config) HasChain(chain string) bool {
@@ -47,10 +46,10 @@ func Clone() Config {
 	defer locker.Unlock()
 
 	cfg := *_Config
-	cfg.Nodes = map[string][]types.Node{}
+	cfg.Nodes = map[string][]aggregator.Node{}
 
 	for key, nodes := range _Config.Nodes {
-		cfg.Nodes[key] = []types.Node{}
+		cfg.Nodes[key] = []aggregator.Node{}
 		for _, node := range nodes {
 			cfg.Nodes[key] = append(cfg.Nodes[key], node)
 		}
@@ -102,7 +101,7 @@ func LoadDefault() {
 				//}
 				return
 			} else {
-				time.Sleep(time.Second)
+				time.Sleep(time.Second * 3)
 			}
 		}
 	}
@@ -132,7 +131,7 @@ func Load() error {
 	}
 	defer db.Close()
 
-	data, err := db.Get(_DB_CONFIG_KEY, nil)
+	data, err := db.Get(aggregator.KeyDbConfig, nil)
 	if err != nil && !errors.Is(err, leveldbErrors.ErrNotFound) {
 		logger.Error("Load Config failed", "error", err.Error())
 		notify.SendError("Load Config failed", err.Error())
@@ -167,7 +166,7 @@ func Save() error {
 		return err
 	}
 
-	err = db.Put(_DB_CONFIG_KEY, data, nil)
+	err = db.Put(aggregator.KeyDbConfig, data, nil)
 	if err != nil {
 		logger.Error("Save Config failed", "error", err.Error())
 		notify.SendError("Save Config failed", err.Error())

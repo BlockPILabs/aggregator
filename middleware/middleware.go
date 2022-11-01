@@ -34,8 +34,16 @@ func Append(middlewares ...Middleware) {
 	}
 }
 
+func First() Middleware {
+	if len(middlewareChain) > 0 {
+		return middlewareChain[0]
+	}
+	return nil
+}
+
 func OnRequest(session *rpc.Session) error {
-	for _, mw := range middlewareChain {
+	mw := First()
+	for mw != nil {
 		err := mw.OnRequest(session)
 		if err != nil {
 			if err == aggregator.ErrMustReturn {
@@ -44,12 +52,14 @@ func OnRequest(session *rpc.Session) error {
 			logger.Error("an error occurred", "sid", session.SId(), "middleware", mw.Name(), "error", err)
 			return err
 		}
+		mw = mw.Next()
 	}
 	return nil
 }
 
 func OnProcess(session *rpc.Session) error {
-	for _, mw := range middlewareChain {
+	mw := First()
+	for mw != nil {
 		err := mw.OnProcess(session)
 		if err != nil {
 			if err == aggregator.ErrMustReturn {
@@ -58,12 +68,14 @@ func OnProcess(session *rpc.Session) error {
 			logger.Error("an error occurred", "sid", session.SId(), "middleware", mw.Name(), "error", err)
 			return err
 		}
+		mw = mw.Next()
 	}
 	return nil
 }
 
 func OnResponse(session *rpc.Session) error {
-	for _, mw := range middlewareChain {
+	mw := First()
+	for mw != nil {
 		err := mw.OnResponse(session)
 		if err != nil {
 			if err == aggregator.ErrMustReturn {
@@ -72,6 +84,7 @@ func OnResponse(session *rpc.Session) error {
 			logger.Error("an error occurred", "sid", session.SId(), "middleware", mw.Name(), "error", err)
 			return err
 		}
+		mw = mw.Next()
 	}
 	return nil
 }

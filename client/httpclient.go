@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpproxy"
+	"net"
 	"strings"
 	"time"
 )
@@ -16,7 +17,13 @@ type Client struct {
 
 func NewClient(timeout int64, proxy string) *Client {
 	cli := &Client{
-		client:  fasthttp.Client{},
+		client: fasthttp.Client{
+			MaxConnsPerHost: 65000,
+			Dial: func(addr string) (net.Conn, error) {
+
+				return nil, nil
+			},
+		},
 		timeout: timeout,
 		proxy:   proxy,
 	}
