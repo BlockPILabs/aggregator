@@ -50,13 +50,13 @@ func (m *HttpProxyMiddleware) OnRequest(session *rpc.Session) error {
 func (m *HttpProxyMiddleware) OnProcess(session *rpc.Session) error {
 	if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
 		logger.Debug("relay rpc -> "+session.RpcMethod(), "sid", session.SId(), "node", session.NodeName, "isTx", session.IsWriteRpcMethod, "tries", session.Tries)
-		err := m.GetClient(session).Relay(&ctx.Request, &ctx.Response)
+		err := m.GetClient(session).Do(&ctx.Request, &ctx.Response)
 		//if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
 		//	ctx.Response.Header.Set("Access-Control-Max-Age", "86400")
 		//	ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
 		//	ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
 		//	ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
-		//	ctx.Response.Header.Set("X-Relay-Node", session.NodeName)
+		//	ctx.Response.Header.Set("X-Do-Node", session.NodeName)
 		//}
 
 		return err

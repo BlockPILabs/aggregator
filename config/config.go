@@ -15,19 +15,28 @@ import (
 )
 
 var (
-	logger           = log.Module("config")
-	defaultConfigUrl = "https://raw.githubusercontent.com/BlockPILabs/chain-specs/dev/aggregator/default-config.json"
-	_Config          = &Config{Password: "blockpi", RequestTimeout: 30, MaxRetries: 3}
+	logger            = log.Module("config")
+	locker            = sync.Mutex{}
+	defaultConfigUrl  = "https://raw.githubusercontent.com/BlockPILabs/chain-specs/dev/aggregator/default-config.json"
+	defaultPhishingDb = "https://safety.blockpi.org/v1/addresses"
 
-	locker = sync.Mutex{}
+	_Config = &Config{
+		Password:                 "blockpi",
+		RequestTimeout:           30,
+		MaxRetries:               3,
+		PhishingDb:               []string{defaultPhishingDb},
+		PhishingDbUpdateInterval: 3600,
+	}
 )
 
 type Config struct {
-	Password       string                       `json:"password,omitempty"`
-	Proxy          string                       `json:"proxy,omitempty"`
-	RequestTimeout int64                        `json:"request_timeout,omitempty"`
-	MaxRetries     int                          `json:"max_retries,omitempty"`
-	Nodes          map[string][]aggregator.Node `json:"nodes"`
+	Password                 string                       `json:"password,omitempty"`
+	Proxy                    string                       `json:"proxy,omitempty"`
+	RequestTimeout           int64                        `json:"request_timeout,omitempty"`
+	MaxRetries               int                          `json:"max_retries,omitempty"`
+	Nodes                    map[string][]aggregator.Node `json:"nodes"`
+	PhishingDb               []string                     `json:"phishing_db"`
+	PhishingDbUpdateInterval int64                        `json:"phishing_db_update_interval"`
 }
 
 func (c Config) HasChain(chain string) bool {
