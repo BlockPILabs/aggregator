@@ -67,16 +67,22 @@ func (m *SafetyMiddleware) OnRequest(session *rpc.Session) error {
 	if session.IsWriteRpcMethod {
 		params := session.RpcParams()
 		logger.Debug("new tx", "method", session.RpcMethod(), "params", params)
-		rawTx := params.([]interface{})[0].(string)
-		msg := utils.DecodeTx(rawTx)
-		if msg != nil {
-			receiver := msg.To().Hex()
 
-			phishing, pha := m.isPhishingAddress(receiver)
-			if phishing {
-				notify.SendError("Transaction is denied", receiver, pha.Description)
-				logger.Error("transaction is denied", "Receiver", receiver, "Reason", pha.Description)
-				return aggregator.ErrDenyRequest
+		if strings.HasSuffix(strings.ToLower(session.RpcMethod()), strings.ToLower("_sendRawTransaction")) {
+			rawTx, ok := params.([]interface{})[0].(string)
+			if !ok {
+				return nil
+			}
+			msg := utils.DecodeTx(rawTx)
+			if msg != nil {
+				receiver := msg.To().Hex()
+
+				phishing, pha := m.isPhishingAddress(receiver)
+				if phishing {
+					notify.SendError("Transaction is denied", receiver, pha.Description)
+					logger.Error("transaction is denied", "Receiver", receiver, "Reason", pha.Description)
+					return aggregator.ErrDenyRequest
+				}
 			}
 		}
 	}

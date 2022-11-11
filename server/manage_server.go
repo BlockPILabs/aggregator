@@ -35,6 +35,8 @@ func routeUpdateConfig(ctx *fasthttp.RequestCtx) {
 	config.SetDefault(&cfg)
 	loadbalance.LoadFromConfig()
 
+	config.Save()
+
 	data, _ := json.Marshal(cfg)
 	ctx.Response.Header.Set("Content-Type", "application/json")
 	ctx.Write(data)
@@ -58,31 +60,36 @@ func NewManageServer() error {
 
 	addr := ":8012"
 	logger.Info("Starting management server", "addr", addr)
-	err := fasthttp.ListenAndServe(addr, func(ctx *fasthttp.RequestCtx) {
-		ctx.Response.Header.Set("Access-Control-Max-Age", "86400")
-		ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
-		ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
-		//ctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Token")
-		ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
-		if string(ctx.Method()) == "OPTIONS" {
-			ctx.SetStatusCode(http.StatusNoContent)
-			ctx.SetBodyString("ok")
-			return
-		}
+	server := fasthttp.Server{
+		Name: "",
+		Handler: func(ctx *fasthttp.RequestCtx) {
+			ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
+			ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
+			ctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Token, Authorization")
+			ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
 
-		auth := ctx.Request.Header.Peek("Authorization")
-		if bytes.HasPrefix(auth, basicAuthPrefix) {
-			payload, err := base64.StdEncoding.DecodeString(string(auth[len(basicAuthPrefix):]))
-			if err == nil {
-				pair := bytes.SplitN(payload, []byte(":"), 2)
-				if len(pair) == 2 && bytes.Equal(pair[0], []byte("blockpi")) && bytes.Equal(pair[1], []byte(config.Default().Password)) {
-					r.Handler(ctx)
-					return
+			if string(ctx.Method()) == "OPTIONS" {
+				ctx.Response.Header.Set("Access-Control-Max-Age", "86400")
+				ctx.SetStatusCode(http.StatusOK)
+				ctx.SetBodyString("ok")
+				return
+			}
+
+			auth := ctx.Request.Header.Peek("Authorization")
+			if bytes.HasPrefix(auth, basicAuthPrefix) {
+				payload, err := base64.StdEncoding.DecodeString(string(auth[len(basicAuthPrefix):]))
+				if err == nil {
+					pair := bytes.SplitN(payload, []byte(":"), 2)
+					if len(pair) == 2 && bytes.Equal(pair[0], []byte("blockpi")) && bytes.Equal(pair[1], []byte(config.Default().Password)) {
+						r.Handler(ctx)
+						return
+					}
 				}
 			}
-		}
-		ctx.Error("Unauthorized", fasthttp.StatusUnauthorized)
-	})
+			ctx.Error("Unauthorized", fasthttp.StatusUnauthorized)
+		},
+	}
+	err := server.ListenAndServe(addr)
 	if err != nil {
 		notify.SendError("Error start manage server.", err.Error())
 		return err
