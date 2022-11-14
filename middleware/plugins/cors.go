@@ -41,11 +41,18 @@ func (m *CorsMiddleware) OnProcess(session *rpc.Session) error {
 
 func (m *CorsMiddleware) OnResponse(session *rpc.Session) error {
 	if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
-		ctx.Response.Header.Set("Access-Control-Max-Age", "86400")
+		if session.Method == "OPTIONS" {
+			ctx.Response.Reset()
+			ctx.Response.Header.Set("Access-Control-Max-Age", "86400")
+		}
 		ctx.Response.Header.Set("Access-Control-Allow-Origin", "*")
 		ctx.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS")
+		ctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Token, Authorization")
 		ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
+
 		ctx.Response.Header.Set("X-Do-Node", session.NodeName)
+
+		ctx.SetStatusCode(fasthttp.StatusOK)
 	}
 	return nil
 }

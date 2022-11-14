@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/BlockPILabs/aggregator/cmd/aggregator/commands"
+	"github.com/BlockPILabs/aggregator/version"
 	"os"
 	"time"
 
@@ -11,6 +12,8 @@ import (
 )
 
 func main() {
+	println(version.Version)
+
 	time.Local = time.UTC
 	initPath()
 

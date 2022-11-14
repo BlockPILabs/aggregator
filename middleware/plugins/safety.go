@@ -66,7 +66,7 @@ func (m *SafetyMiddleware) SetNext(middleware middleware.Middleware) {
 func (m *SafetyMiddleware) OnRequest(session *rpc.Session) error {
 	if session.IsWriteRpcMethod {
 		params := session.RpcParams()
-		logger.Debug("new tx", "method", session.RpcMethod(), "params", params)
+		logger.Debug("new tx", "method", session.RpcMethod())
 
 		if strings.HasSuffix(strings.ToLower(session.RpcMethod()), strings.ToLower("_sendRawTransaction")) {
 			rawTx, ok := params.([]interface{})[0].(string)
@@ -85,6 +85,7 @@ func (m *SafetyMiddleware) OnRequest(session *rpc.Session) error {
 				}
 			}
 		}
+
 	}
 	return nil
 }

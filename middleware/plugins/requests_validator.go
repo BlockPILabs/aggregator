@@ -4,7 +4,6 @@ import (
 	"github.com/BlockPILabs/aggregator/aggregator"
 	"github.com/BlockPILabs/aggregator/middleware"
 	"github.com/BlockPILabs/aggregator/rpc"
-	"github.com/valyala/fasthttp"
 	"strings"
 )
 
@@ -55,9 +54,9 @@ func (m *RequestValidatorMiddleware) OnRequest(session *rpc.Session) error {
 
 func (m *RequestValidatorMiddleware) OnProcess(session *rpc.Session) error {
 	if session.Method == "OPTIONS" {
-		if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
-			ctx.Error("ok", fasthttp.StatusOK)
-		}
+		//if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
+		//
+		//}
 
 		return aggregator.ErrMustReturn
 	}

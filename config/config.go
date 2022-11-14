@@ -17,7 +17,7 @@ import (
 var (
 	logger            = log.Module("config")
 	locker            = sync.Mutex{}
-	defaultConfigUrl  = "https://raw.githubusercontent.com/BlockPILabs/chain-specs/dev/aggregator/default-config.json"
+	defaultConfigUrl  = "https://aggregator-config-dev.blockpi.io/default-config.json"
 	defaultPhishingDb = "https://safety.blockpi.org/v1/addresses"
 
 	_Config = &Config{
