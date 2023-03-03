@@ -66,26 +66,29 @@ func (m *SafetyMiddleware) SetNext(middleware middleware.Middleware) {
 func (m *SafetyMiddleware) OnRequest(session *rpc.Session) error {
 	if session.IsWriteRpcMethod {
 		params := session.RpcParams()
-		logger.Debug("new tx", "method", session.RpcMethod())
+		//logger.Debug("new tx", "method", session.RpcMethod())
 
 		if strings.HasSuffix(strings.ToLower(session.RpcMethod()), strings.ToLower("_sendRawTransaction")) {
 			rawTx, ok := params.([]interface{})[0].(string)
 			if !ok {
 				return nil
 			}
-			msg := utils.DecodeTx(rawTx)
-			if msg != nil {
-				receiver := msg.To().Hex()
-
+			tx, err := utils.DecodeTx(rawTx)
+			if err != nil {
+				logger.Warn("Unable to decode tx")
+				notify.SendNotice("Unable to decode tx")
+			} else {
+				receiver := tx.To().Hex()
 				phishing, pha := m.isPhishingAddress(receiver)
 				if phishing {
 					notify.SendError("Transaction is denied", receiver, pha.Description)
 					logger.Error("transaction is denied", "Receiver", receiver, "Reason", pha.Description)
 					return aggregator.ErrDenyRequest
 				}
+				//session.ChainId = tx.ChainId().Int64()
+				session.Tx = tx
 			}
 		}
-
 	}
 	return nil
 }
@@ -131,25 +134,21 @@ func (m *SafetyMiddleware) updatePhishingDb() {
 				log.Error("Phishing db update failed", "url", dbUrl, "err", err)
 				return
 			}
-			result := map[string]interface{}{}
+			result := map[string]string{}
 			err = json.Unmarshal(resp.Body(), &result)
 			if err != nil {
 				log.Error("Phishing db update failed", "url", dbUrl, "err", err)
 				return
 			}
 
-			if result["success"].(bool) {
-				for addr, val := range result["result"].(map[string]interface{}) {
-					pha := &phishingAddress{
-						Address: strings.ToLower(addr),
-					}
-					description := (val.([]interface{})[0]).(map[string]interface{})["description"]
-					if description != nil {
-						pha.Description = description.(string)
-					}
-					phishingAddresses = append(phishingAddresses, pha)
+			for addr, desc := range result {
+				pha := &phishingAddress{
+					Address:     strings.ToLower(addr),
+					Description: desc,
 				}
+				phishingAddresses = append(phishingAddresses, pha)
 			}
+
 		}()
 	}
 

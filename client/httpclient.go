@@ -14,6 +14,10 @@ type Client struct {
 	proxy      string
 }
 
+func DefaultClient() *Client {
+	return NewClient(30, "")
+}
+
 func NewClient(timeout int64, proxy string) *Client {
 	cli := &Client{
 		client: fasthttp.Client{

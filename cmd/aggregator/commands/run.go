@@ -37,14 +37,11 @@ func RunCommand() *cli.Command {
 		Action: func(context *cli.Context) error {
 			wg := errgroup.Group{}
 			wg.Go(func() error {
-				return server.NewServer()
-			})
-
-			wg.Go(func() error {
-
 				return server.NewManageServer()
 			})
-
+			wg.Go(func() error {
+				return server.NewServer()
+			})
 			return wg.Wait()
 		},
 		Subcommands: []*cli.Command{},

@@ -36,7 +36,7 @@ func NextNode(chain string) *aggregator.Node {
 
 func LoadFromConfig() {
 	for chain, nodes := range config.Default().Nodes {
-		logger.Info("Set load balance selectors", "chain", chain, "nodes", len(nodes))
+		logger.Info("New load balancer", "chain", chain, "nodes", len(nodes))
 		SetNodes(chain, nodes)
 	}
 }

@@ -17,8 +17,8 @@ import (
 var (
 	logger            = log.Module("config")
 	locker            = sync.Mutex{}
-	defaultConfigUrl  = "https://aggregator-config-dev.blockpi.io/default-config.json"
-	defaultPhishingDb = "https://safety.blockpi.org/v1/addresses"
+	defaultConfigUrl  = "https://cfg.rpchub.io/agg/default.json"
+	defaultPhishingDb = "https://cfg.rpchub.io/agg/scam-addresses.json"
 
 	_Config = &Config{
 		Password:                 "blockpi",
@@ -87,7 +87,7 @@ func LoadDefault() {
 		if err == nil && statusCode == 200 {
 			err = json.Unmarshal(data, &_Config)
 			if err == nil {
-				logger.Info("Load default Config success")
+				logger.Info("Load default config success")
 				return
 			}
 		}
@@ -97,36 +97,17 @@ func LoadDefault() {
 			if err != nil {
 				errStr = err.Error()
 			}
-			logger.Error("Load default Config failed", "statusCode", statusCode, "error", errStr, "retries", retries)
+			logger.Error("Load default config failed", "statusCode", statusCode, "error", errStr, "retries", retries)
 
 			if retries >= 5 {
 				notify.SendError("Load default Config failed", fmt.Sprintf("Status Code: %d\nError: %s", statusCode, errStr))
 				logger.Warn("Load default config failed, you may manually update the config by postman or via blockpi aggregator manager [https://aggregator.blockpi.io]")
-				//if err != nil {
-				//	notify.SendError("Load default Config failed", err.Error())
-				//}
-				//if statusCode > 0 {
-				//	notify.SendError("Load default Config failed", fmt.Sprintf("Status Code: %d", statusCode))
-				//}
 				return
 			} else {
 				time.Sleep(time.Second * 3)
 			}
 		}
 	}
-
-	//Config.RequestTimeout = 30
-	//Config.Nodes = map[string][]*types.Node{}
-	//Config.Nodes["klaytn"] = []*types.Node{
-	//	{
-	//		Name: "blockpi",
-	//		//Endpoint: "http://168.119.1.188:9645/",
-	//		Endpoint: "https://public-rpc.blockpi.me/klaytn",
-	//		Weight:   100,
-	//		ReadOnly: false,
-	//		Disabled: false,
-	//	},
-	//}
 }
 
 func Load() error {

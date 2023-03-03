@@ -39,7 +39,7 @@ func (m *LoadBalanceMiddleware) OnRequest(session *rpc.Session) error {
 		return aggregator.ErrServerError
 	}
 	session.NodeName = node.Name
-	logger.Debug("load balance", "sid", session.SId(), "node", node.Name)
+	//logger.Debug("load balance", "sid", session.SId(), "node", node.Name)
 	if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
 		ctx.Request.SetRequestURI(node.Endpoint)
 	}

@@ -9,7 +9,10 @@ import (
 
 var (
 	defaultWriteMethods = []string{
-		"_call", "_sendRawTransaction", "_sendTransaction", "_sendTransactionAsFeePayer",
+		strings.ToLower("_call"),
+		strings.ToLower("_sendRawTransaction"),
+		strings.ToLower("_sendTransaction"),
+		strings.ToLower("_sendTransactionAsFeePayer"),
 	}
 )
 
@@ -39,6 +42,7 @@ func (m *RequestValidatorMiddleware) SetNext(middleware middleware.Middleware) {
 }
 
 func (m *RequestValidatorMiddleware) OnRequest(session *rpc.Session) error {
+
 	if session.Method == "OPTIONS" {
 		return aggregator.ErrMustReturn
 	}
@@ -69,8 +73,9 @@ func (m *RequestValidatorMiddleware) OnResponse(session *rpc.Session) error {
 
 func (m *RequestValidatorMiddleware) isWriteMethod(method string) bool {
 	if len(method) > 0 {
+		method := strings.ToLower(method)
 		for _, m := range defaultWriteMethods {
-			if strings.HasSuffix(strings.ToLower(method), strings.ToLower(m)) {
+			if strings.HasSuffix(method, m) {
 				return true
 			}
 		}
