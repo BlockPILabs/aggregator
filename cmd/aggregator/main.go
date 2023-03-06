@@ -32,7 +32,7 @@ func initPath() {
 	}
 
 	if !gfile.Exists(dir) {
-		err = os.MkdirAll(dir, 0600)
+		err = os.MkdirAll(dir, 0700)
 		if err != nil {
 			panic(err)
 		}
