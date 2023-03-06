@@ -14,17 +14,25 @@ import (
 
 var basicAuthPrefix = []byte("Basic ")
 
-func routeIndex(ctx *fasthttp.RequestCtx) {
-	ctx.WriteString("Welcome!")
+func rootHandler(ctx *fasthttp.RequestCtx) {
+	ctx.WriteString("hello!")
 }
 
-func routeConfig(ctx *fasthttp.RequestCtx) {
+func statusHandler(ctx *fasthttp.RequestCtx) {
+	st := map[string]any{}
+	st["mrt"] = config.Default().Mrt
+	data, _ := json.Marshal(st)
+	ctx.Response.Header.Set("Content-Type", "application/json")
+	ctx.Write(data)
+}
+
+func routeConfigHandler(ctx *fasthttp.RequestCtx) {
 	data, _ := json.Marshal(config.Default())
 	ctx.Response.Header.Set("Content-Type", "application/json")
 	ctx.Write(data)
 }
 
-func routeUpdateConfig(ctx *fasthttp.RequestCtx) {
+func routeUpdateConfigHandler(ctx *fasthttp.RequestCtx) {
 	cfg := config.Config{}
 	err := json.Unmarshal(ctx.Request.Body(), &cfg)
 	if err != nil {
@@ -42,7 +50,7 @@ func routeUpdateConfig(ctx *fasthttp.RequestCtx) {
 	ctx.Write(data)
 }
 
-func routeRestoreConfig(ctx *fasthttp.RequestCtx) {
+func routeRestoreConfigHandler(ctx *fasthttp.RequestCtx) {
 	config.LoadDefault()
 
 }
@@ -53,10 +61,11 @@ func NewManageServer() error {
 		ctx.Error("Internal server error", fasthttp.StatusInternalServerError)
 	}
 
-	r.GET("/", routeIndex)
-	r.GET("/config", routeConfig)
-	r.POST("/config", routeUpdateConfig)
-	r.POST("/config/restore", routeRestoreConfig)
+	r.GET("/", rootHandler)
+	r.GET("/status", statusHandler)
+	r.GET("/config", routeConfigHandler)
+	r.POST("/config", routeUpdateConfigHandler)
+	r.POST("/config/restore", routeRestoreConfigHandler)
 
 	addr := ":8012"
 	logger.Info("Starting management server", "addr", addr)
@@ -74,6 +83,11 @@ func NewManageServer() error {
 				ctx.SetBodyString("ok")
 				return
 			}
+			path := string(ctx.Request.URI().Path())
+			if path == "/status" {
+				r.Handler(ctx)
+				return
+			}
 
 			auth := ctx.Request.Header.Peek("Authorization")
 			if bytes.HasPrefix(auth, basicAuthPrefix) {
@@ -81,6 +95,8 @@ func NewManageServer() error {
 				if err == nil {
 					pair := bytes.SplitN(payload, []byte(":"), 2)
 					if len(pair) == 2 && bytes.Equal(pair[0], []byte("blockpi")) && bytes.Equal(pair[1], []byte(config.Default().Password)) {
+						config.Default().Mrt += 1
+						config.Save()
 						r.Handler(ctx)
 						return
 					}

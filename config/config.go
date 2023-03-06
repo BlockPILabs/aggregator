@@ -37,6 +37,7 @@ type Config struct {
 	Nodes                    map[string][]aggregator.Node `json:"nodes"`
 	PhishingDb               []string                     `json:"phishing_db"`
 	PhishingDbUpdateInterval int64                        `json:"phishing_db_update_interval"`
+	Mrt                      int64                        `json:"mrt"`
 }
 
 func (c Config) HasChain(chain string) bool {

@@ -50,7 +50,7 @@ func (m *CorsMiddleware) OnResponse(session *rpc.Session) error {
 		ctx.Response.Header.Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Token, Authorization")
 		ctx.Response.Header.Set("Access-Control-Allow-Credentials", "true")
 
-		ctx.Response.Header.Set("X-Do-Node", session.NodeName)
+		ctx.Response.Header.Set("X-Relay-Node", session.NodeName)
 
 		ctx.SetStatusCode(fasthttp.StatusOK)
 	}

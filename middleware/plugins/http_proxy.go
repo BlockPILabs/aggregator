@@ -59,6 +59,10 @@ func (m *HttpProxyMiddleware) OnProcess(session *rpc.Session) error {
 		//	ctx.Response.Header.Set("X-Do-Node", session.NodeName)
 		//}
 
+		if err != nil {
+			log.Error(err.Error(), "node", session.NodeName)
+		}
+
 		return err
 	}
 
@@ -79,7 +83,7 @@ func (m *HttpProxyMiddleware) GetClient(session *rpc.Session) *client.Client {
 		}
 	}
 
-	log.Debug("renew proxy http client")
+	//log.Debug("renew proxy http client")
 	m.client = client.NewClient(session.Cfg.RequestTimeout, session.Cfg.Proxy)
 	m.clientCreatedAt = time.Now()
 
