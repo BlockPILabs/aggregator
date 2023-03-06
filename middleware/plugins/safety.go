@@ -19,7 +19,7 @@ import (
 var (
 	phishingAddressMap = map[string]*phishingAddress{}
 	mu                 = sync.Mutex{}
-	nextUpdateAt       = time.Now()
+	lastUpdateAt       time.Time
 )
 
 type SafetyMiddleware struct {
@@ -37,10 +37,10 @@ func NewSafetyMiddleware() *SafetyMiddleware {
 	m.updatePhishingDb()
 	go func() {
 		for {
-			if nextUpdateAt.Sub(time.Now()) <= 0 {
+			if time.Since(lastUpdateAt) > time.Second*time.Duration(config.Default().PhishingDbUpdateInterval) {
 				m.updatePhishingDb()
 			}
-			time.Sleep(time.Second)
+			time.Sleep(time.Second * 10)
 		}
 	}()
 
@@ -106,7 +106,6 @@ func (m *SafetyMiddleware) updatePhishingDb() {
 	if cfg.PhishingDb == nil || len(cfg.PhishingDb) == 0 {
 		return
 	}
-	nextUpdateAt = time.Now().Add(time.Second * 10)
 
 	cli := client.NewClient(cfg.RequestTimeout, cfg.Proxy)
 	req := fasthttp.AcquireRequest()
@@ -175,7 +174,7 @@ func (m *SafetyMiddleware) updatePhishingDb() {
 	count := len(phishingAddressMap)
 	logger.Info("Updated phishing db", "addresses", count)
 
-	nextUpdateAt = time.Now().Add(time.Second * time.Duration(cfg.PhishingDbUpdateInterval))
+	lastUpdateAt = time.Now()
 }
 
 func (m *SafetyMiddleware) isPhishingAddress(address string) (exist bool, pha *phishingAddress) {

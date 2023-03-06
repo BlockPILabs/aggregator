@@ -36,7 +36,7 @@ func routeUpdateConfigHandler(ctx *fasthttp.RequestCtx) {
 	cfg := config.Config{}
 	err := json.Unmarshal(ctx.Request.Body(), &cfg)
 	if err != nil {
-		ctx.Error("error parse config", fasthttp.StatusOK)
+		ctx.Error("error parse config", fasthttp.StatusInternalServerError)
 		return
 	}
 
