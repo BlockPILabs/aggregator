@@ -40,6 +40,7 @@ func routeUpdateConfigHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
+	cfg.Mrt = config.Default().Mrt
 	config.SetDefault(&cfg)
 	loadbalance.LoadFromConfig()
 
