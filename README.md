@@ -10,9 +10,7 @@ Configurations are stored and utilized locally to best protect your privacy.
 
 
 ## Installation
-```shell
-    TBA.
-```
+Download the last release [here](https://github.com/BlockPILabs/aggregator/releases)
 
 ## Building from source
 ```shell
@@ -25,4 +23,15 @@ To start the aggregator, the following command can be run:
     build/aggregator
 ```
 ## Configuration
-Visit BTA to configure the aggregator
+Default password is `blockpi`.
+
+Visit https://ag-cfg.rpchub.io/ to configure the aggregator.
+
+Or get current config by using command, replace `<password>` to what you set:
+```shell
+curl -u blockpi:<password> 'http://localhost:8012/config'
+```
+To update the configuration, the following command can be run:
+```shell
+curl -u blockpi:<password> -X POST 'http://localhost:8012/config' --header 'Content-Type: application/json' --data-raw '{"password":"blockpi","request_timeout":30,"max_retries":3,"nodes":{"bsc":[{"name":"blockpi-public-bsc","endpoint":"https://bsc.blockpi.network/v1/rpc/public","weight":100,"read_only":false,"disabled":false}],"ethereum":[{"name":"blockpi-public-ethereum","endpoint":"https://ethereum.blockpi.network/v1/rpc/public","weight":90,"read_only":false,"disabled":false},{"name":"ethereum-ankr","endpoint":"https://rpc.ankr.com/eth","weight":10,"read_only":false,"disabled":false}]},"phishing_db":["https://cfg.rpchub.io/agg/scam-addresses.json"],"phishing_db_update_interval":60}'
+```
