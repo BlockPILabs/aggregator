@@ -27,7 +27,7 @@ Default password is `blockpi`.
 
 Visit https://ag-cfg.rpchub.io/ to configure the aggregator.
 
-Or get current config by using command, replace `<password>` to what you set:
+Or get current configuration by using command, replace `<password>` to what you set or using the default password:
 ```shell
 curl -u blockpi:<password> 'http://localhost:8012/config'
 ```
