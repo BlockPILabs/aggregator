@@ -95,7 +95,7 @@ func NewManageServer() error {
 				payload, err := base64.StdEncoding.DecodeString(string(auth[len(basicAuthPrefix):]))
 				if err == nil {
 					pair := bytes.SplitN(payload, []byte(":"), 2)
-					if len(pair) == 2 && bytes.Equal(pair[0], []byte("blockpi")) && bytes.Equal(pair[1], []byte(config.Default().Password)) {
+					if len(pair) == 2 && bytes.Equal(pair[0], []byte("rpchub")) && bytes.Equal(pair[1], []byte(config.Default().Password)) {
 						config.Default().Mrt += 1
 						config.Save()
 						r.Handler(ctx)

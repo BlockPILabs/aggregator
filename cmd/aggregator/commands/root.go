@@ -10,7 +10,7 @@ func RootApp() *cli.App {
 	runCmd := RunCommand()
 	cmd := &cli.App{
 		Name:                 "aggregator",
-		Usage:                "blockpi aggregator",
+		Usage:                "RPCHub aggregator",
 		Flags:                runCmd.Flags,
 		EnableBashCompletion: true,
 		BashComplete:         cli.DefaultAppComplete,

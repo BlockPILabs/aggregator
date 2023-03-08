@@ -10,6 +10,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/valyala/fasthttp"
+	"sort"
 	"sync"
 	"time"
 )
@@ -21,7 +22,7 @@ var (
 	defaultPhishingDb = "https://cfg.rpchub.io/agg/scam-addresses.json"
 
 	_Config = &Config{
-		Password:                 "blockpi",
+		Password:                 "123456",
 		RequestTimeout:           30,
 		MaxRetries:               3,
 		PhishingDb:               []string{defaultPhishingDb},
@@ -102,7 +103,7 @@ func LoadDefault() {
 
 			if retries >= 5 {
 				notify.SendError("Load default Config failed", fmt.Sprintf("Status Code: %d\nError: %s", statusCode, errStr))
-				logger.Warn("Load default config failed, you may manually update the config by postman or via blockpi aggregator manager [https://aggregator.blockpi.io]")
+				logger.Warn("Load default config failed, See the documents for more details [https://docs.rpchub.io/]")
 				return
 			} else {
 				time.Sleep(time.Second * 3)
@@ -172,5 +173,6 @@ func Chains() []string {
 	for key, _ := range Default().Nodes {
 		chains = append(chains, key)
 	}
+	sort.Strings(chains)
 	return chains
 }

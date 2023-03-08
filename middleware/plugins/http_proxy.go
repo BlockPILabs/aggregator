@@ -59,8 +59,20 @@ func (m *HttpProxyMiddleware) OnProcess(session *rpc.Session) error {
 		//	ctx.Response.Header.Set("X-Do-Node", session.NodeName)
 		//}
 
+		shouldDisableEndpoint := false
 		if err != nil {
 			log.Error(err.Error(), "node", session.NodeName)
+			shouldDisableEndpoint = true
+		}
+
+		statusCode := ctx.Response.StatusCode()
+		if statusCode/100 != 2 {
+			log.Error("error status code", "code", statusCode, "node", session.NodeName)
+			shouldDisableEndpoint = true
+		}
+
+		if shouldDisableEndpoint {
+			//todo disable endpoint
 		}
 
 		return err

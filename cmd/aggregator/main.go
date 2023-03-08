@@ -26,7 +26,7 @@ func main() {
 }
 
 func initPath() {
-	dir, err := gfile.Home(".blockpi/aggregator")
+	dir, err := gfile.Home(".rpchub/aggregator")
 	if err != nil {
 		panic(err)
 	}

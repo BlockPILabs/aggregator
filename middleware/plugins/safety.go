@@ -115,6 +115,8 @@ func (m *SafetyMiddleware) updatePhishingDb() {
 
 	var phishingAddresses []*phishingAddress
 
+	hasError := false
+
 	for _, dbUrl := range cfg.PhishingDb {
 		logger.Info("Updating phishing db", "url", dbUrl)
 
@@ -131,6 +133,7 @@ func (m *SafetyMiddleware) updatePhishingDb() {
 			err := cli.Do(req, resp)
 			if err != nil {
 				log.Error("Phishing db update failed", "url", dbUrl, "err", err)
+				hasError = true
 				return
 			}
 			result := map[string]string{}
@@ -174,7 +177,9 @@ func (m *SafetyMiddleware) updatePhishingDb() {
 	count := len(phishingAddressMap)
 	logger.Info("Updated phishing db", "addresses", count)
 
-	lastUpdateAt = time.Now()
+	if !hasError {
+		lastUpdateAt = time.Now()
+	}
 }
 
 func (m *SafetyMiddleware) isPhishingAddress(address string) (exist bool, pha *phishingAddress) {

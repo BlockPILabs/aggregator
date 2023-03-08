@@ -23,20 +23,20 @@ To start the aggregator, the following command can be run:
     build/aggregator
 ```
 ## Configuration
-Default password is `blockpi`.
+Default password is `123456`.
 
-Visit https://ag-cfg.rpchub.io/ to configure the aggregator.
+Visit https://ag-cfg.rpchub.io/ to configure the aggregator. See the [documents](https://docs.rpchub.io/) for more details.
 
-Or get current configuration by using command, replace `<password>` to what you set or using the default password:
+Get current configuration by using command, replace `<password>` to what you set or using the default password:
 ```shell
-curl -u blockpi:<password> 'http://localhost:8012/config'
+curl -u rpchub:<password> 'http://localhost:8012/config'
 ```
 To update the configuration, the following command can be run:
 ```shell
-curl -u blockpi:<password> -X POST 'http://localhost:8012/config' --header 'Content-Type: application/json' --data-raw '{"password":"blockpi","request_timeout":30,"max_retries":3,"nodes":{"bsc":[{"name":"blockpi-public-bsc","endpoint":"https://bsc.blockpi.network/v1/rpc/public","weight":100,"read_only":false,"disabled":false}],"ethereum":[{"name":"blockpi-public-ethereum","endpoint":"https://ethereum.blockpi.network/v1/rpc/public","weight":90,"read_only":false,"disabled":false},{"name":"ethereum-ankr","endpoint":"https://rpc.ankr.com/eth","weight":10,"read_only":false,"disabled":false}]},"phishing_db":["https://cfg.rpchub.io/agg/scam-addresses.json"],"phishing_db_update_interval":60}'
+curl -u rpchub:<password> -X POST 'http://localhost:8012/config' --header 'Content-Type: application/json' --data-raw '{"password":"123456","request_timeout":30,"max_retries":3,"nodes":{"bsc":[{"name":"bsc-official","endpoint":"https://bsc-dataseed.binance.org","weight":100,"read_only":false,"disabled":false}],"ethereum":[{"name":"blockpi-public-ethereum","endpoint":"https://ethereum.blockpi.network/v1/rpc/public","weight":90,"read_only":false,"disabled":false},{"name":"ethereum-ankr","endpoint":"https://rpc.ankr.com/eth","weight":10,"read_only":false,"disabled":false}]},"phishing_db":["https://cfg.rpchub.io/agg/scam-addresses.json"],"phishing_db_update_interval":3600}'
 ```
 
 ## Reset configuration
 1. Stop the aggregator. 
-2. Delete the configuration directory `rm -rf $HOME/.blockpi/aggregator/`.
+2. Delete the configuration directory `rm -rf $HOME/.rpchub/aggregator/`.
 3. Restart the aggregator
