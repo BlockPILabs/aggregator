@@ -33,7 +33,7 @@ curl -u rpchub:<password> 'http://localhost:8012/config'
 ```
 To update the configuration, the following command can be run:
 ```shell
-curl -u rpchub:<password> -X POST 'http://localhost:8012/config' --header 'Content-Type: application/json' --data-raw '{"password":"123456","request_timeout":30,"max_retries":3,"nodes":{"bsc":[{"name":"bsc-official","endpoint":"https://bsc-dataseed.binance.org","weight":100,"read_only":false,"disabled":false}],"ethereum":[{"name":"blockpi-public-ethereum","endpoint":"https://ethereum.blockpi.network/v1/rpc/public","weight":90,"read_only":false,"disabled":false},{"name":"ethereum-ankr","endpoint":"https://rpc.ankr.com/eth","weight":10,"read_only":false,"disabled":false}]},"phishing_db":["https://cfg.rpchub.io/agg/scam-addresses.json"],"phishing_db_update_interval":3600}'
+curl -u rpchub:<password> -X POST 'http://localhost:8012/config' --header 'Content-Type: application/json' --data-raw '{"password":"123456","request_timeout":30,"max_retries":3,"nodes":{"arbitrum":[{"name":"blockpi-public-arbitrum","endpoint":"https://arbitrum.blockpi.network/v1/rpc/public","weight":90,"read_only":false,"disabled":false},{"name":"arbitrum-official","endpoint":"https://arb1.arbitrum.io/rpc","weight":10,"read_only":false,"disabled":false}],"bsc":[{"name":"blockpi-public-bsc","endpoint":"https://bsc.blockpi.network/v1/rpc/public","weight":100,"read_only":false,"disabled":false}]},"phishing_db":["https://cfg.rpchub.io/agg/scam-addresses.json"],"phishing_db_update_interval":3600}'
 ```
 
 ## Reset configuration
