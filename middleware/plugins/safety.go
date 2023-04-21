@@ -73,7 +73,7 @@ func (m *SafetyMiddleware) OnRequest(session *rpc.Session) error {
 		params := session.RpcParams()
 		//logger.Debug("new tx", "method", session.RpcMethod())
 		rpcMethod := session.RpcMethod()
-		rpcMethod = rpcMethod[strings.Index(rpcMethod, "_"):]
+		rpcMethod = strings.ToLower(rpcMethod[strings.Index(rpcMethod, "_"):])
 
 		targetAddress := ""
 
@@ -113,7 +113,7 @@ func (m *SafetyMiddleware) OnRequest(session *rpc.Session) error {
 				if len(pha.Reporter) > 0 {
 					reporter = "Reporter: " + pha.Reporter
 				}
-				notify.SendError("Option denied: "+pha.Description, m.shortAddress(targetAddress), reporter)
+				notify.Send("Option denied - scam address", m.shortAddress(targetAddress), reporter)
 				logger.Error("Option denied", "target", targetAddress, "Reason", pha.Description, "reporter", pha.Reporter)
 				return aggregator.ErrDenyRequest
 			}
@@ -134,7 +134,7 @@ func (m *SafetyMiddleware) OnResponse(session *rpc.Session) error {
 func (m *SafetyMiddleware) shortAddress(address string) string {
 	length := len(address)
 	if length > 10 {
-		return address[0:6] + address[length-4:]
+		return address[0:6] + "..." + address[length-4:]
 	}
 	return address
 }
