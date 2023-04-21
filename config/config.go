@@ -39,6 +39,13 @@ type Config struct {
 	PhishingDb               []string                     `json:"phishing_db"`
 	PhishingDbUpdateInterval int64                        `json:"phishing_db_update_interval"`
 	Mrt                      int64                        `json:"mrt"`
+	AuthorityDB              []AuthorityDB                `json:"authority_db"`
+}
+
+type AuthorityDB struct {
+	Name   string `json:"name"`
+	Url    string `json:"url"`
+	Enable bool   `json:"enable"`
 }
 
 func (c Config) HasChain(chain string) bool {
@@ -82,15 +89,17 @@ func SetDefault(cfg *Config) {
 	_Config = cfg
 }
 
-func LoadDefault() {
+func LoadDefault() *Config {
+	var cfg *Config
+
 	retries := 0
 	for {
 		statusCode, data, err := (&fasthttp.Client{}).GetTimeout(nil, defaultConfigUrl, time.Second*5)
 		if err == nil && statusCode == 200 {
-			err = json.Unmarshal(data, &_Config)
+			err = json.Unmarshal(data, &cfg)
 			if err == nil {
 				logger.Info("Load default config success")
-				return
+				break
 			}
 		}
 		if err != nil || statusCode != 200 {
@@ -104,16 +113,18 @@ func LoadDefault() {
 			if retries >= 5 {
 				notify.SendError("Load default Config failed", fmt.Sprintf("Status Code: %d\nError: %s", statusCode, errStr))
 				logger.Warn("Load default config failed, See the documents for more details [https://docs.rpchub.io/]")
-				return
+				break
 			} else {
 				time.Sleep(time.Second * 3)
 			}
 		}
 	}
+
+	return cfg
 }
 
 func Load() error {
-	LoadDefault()
+	cfg := LoadDefault()
 
 	db, err := leveldb.OpenFile("data/db", nil)
 	if err != nil {
@@ -130,16 +141,40 @@ func Load() error {
 		return err
 	}
 
+	cfgLocal := Config{}
 	if data != nil {
-		err = json.Unmarshal(data, &_Config)
+		err = json.Unmarshal(data, &cfgLocal)
 		if err != nil {
 			logger.Error("Load Config failed", "error", err.Error())
 			notify.SendError("Load Config failed", err.Error())
 			return err
 		}
+
+		if cfg != nil {
+			for k, v := range cfg.Nodes {
+				if cfgLocal.Nodes[k] == nil {
+					cfgLocal.Nodes[k] = v
+				}
+			}
+
+			dbs := cfg.AuthorityDB
+			for i := 0; i < len(dbs); i++ {
+				for _, adbLocal := range cfgLocal.AuthorityDB {
+					if dbs[i].Name == adbLocal.Name {
+						dbs[i].Enable = adbLocal.Enable
+					}
+				}
+			}
+			cfgLocal.AuthorityDB = dbs
+		}
 	}
 
-	return nil
+	_Config = &cfgLocal
+
+	data, _ = json.Marshal(_Config)
+	err = db.Put(aggregator.KeyDbConfig, data, nil)
+
+	return err
 }
 
 func Save() error {

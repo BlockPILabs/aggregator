@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/BlockPILabs/aggregator/aggregator"
 	"github.com/BlockPILabs/aggregator/config"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/valyala/fasthttp"
 	"strings"
 	"sync"
@@ -28,7 +27,7 @@ type Session struct {
 	NodeName         string
 	IsWriteRpcMethod bool
 
-	Tx *types.Transaction
+	//Tx *types.Transaction
 }
 
 func (s *Session) Init() error {

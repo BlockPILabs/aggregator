@@ -22,6 +22,7 @@ func RunCommand() *cli.Command {
 			}
 
 			config.Load()
+
 			loadbalance.LoadFromConfig()
 
 			middleware.Append(

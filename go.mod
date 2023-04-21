@@ -7,6 +7,7 @@ require (
 	github.com/fasthttp/router v1.4.12
 	github.com/gogf/gf/v2 v2.2.0
 	github.com/inconshreveable/log15 v0.0.0-20201112154412-8562bdadbbac
+	github.com/magiconair/properties v1.8.6
 	github.com/martinlindhe/notify v0.0.0-20181008203735-20632c9a275a
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	github.com/urfave/cli/v2 v2.19.2

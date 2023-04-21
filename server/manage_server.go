@@ -40,7 +40,20 @@ func routeUpdateConfigHandler(ctx *fasthttp.RequestCtx) {
 		return
 	}
 
-	cfg.Mrt = config.Default().Mrt
+	defaultCfg := config.Default()
+	cfg.Mrt = defaultCfg.Mrt
+
+	dbs := defaultCfg.AuthorityDB
+	for i := 0; i < len(dbs); i++ {
+		for _, adb2 := range cfg.AuthorityDB {
+			if dbs[i].Name == adb2.Name {
+				dbs[i].Enable = adb2.Enable
+			}
+		}
+	}
+
+	cfg.AuthorityDB = dbs
+
 	config.SetDefault(&cfg)
 	loadbalance.LoadFromConfig()
 
