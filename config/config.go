@@ -141,7 +141,7 @@ func Load() error {
 		return err
 	}
 
-	cfgLocal := Config{}
+	var cfgLocal *Config
 	if data != nil {
 		err = json.Unmarshal(data, &cfgLocal)
 		if err != nil {
@@ -169,7 +169,11 @@ func Load() error {
 		}
 	}
 
-	_Config = &cfgLocal
+	if cfgLocal != nil {
+		_Config = cfgLocal
+	} else {
+		_Config = cfg
+	}
 
 	data, _ = json.Marshal(_Config)
 	err = db.Put(aggregator.KeyDbConfig, data, nil)
