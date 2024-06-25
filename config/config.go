@@ -18,7 +18,7 @@ import (
 var (
 	logger            = log.Module("config")
 	locker            = sync.Mutex{}
-	defaultConfigUrl  = "https://cfg.rpchub.io/agg/default.json"
+	DefaultConfigUrl  = ""
 	defaultPhishingDb = "https://cfg.rpchub.io/agg/scam-addresses.json"
 
 	_Config = &Config{
@@ -94,7 +94,7 @@ func LoadDefault() *Config {
 
 	retries := 0
 	for {
-		statusCode, data, err := (&fasthttp.Client{}).GetTimeout(nil, defaultConfigUrl, time.Second*5)
+		statusCode, data, err := (&fasthttp.Client{}).GetTimeout(nil, DefaultConfigUrl, time.Second*5)
 		if err == nil && statusCode == 200 {
 			err = json.Unmarshal(data, &cfg)
 			if err == nil {
