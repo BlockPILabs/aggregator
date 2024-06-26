@@ -10,9 +10,9 @@ all: build
 
 .PHONY: build
 build:
-	go build -ldflags "$(GOLDFLAGS)"  -o ./build/ ./cmd/aggregator
+	CGO_ENABLED=0 go build -ldflags "$(GOLDFLAGS)" -o ./build/ ./cmd/aggregator
 build-op:
-	go build -ldflags "$(GOLDFLAGS) $(GO_OPLDFLAGS)"  -o ./build/ ./cmd/aggregator
+	CGO_ENABLED=0 go build -ldflags "$(GOLDFLAGS) $(GO_OPLDFLAGS)"  -o ./build/ ./cmd/aggregator
 #build-windows:
 #	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build $(GOFLAGS) -o ./build/ ./cmd/aggregator
 #build-mac:
