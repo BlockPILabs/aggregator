@@ -18,7 +18,7 @@ import (
 var (
 	logger            = log.Module("config")
 	locker            = sync.Mutex{}
-	DefaultConfigUrl  = ""
+	DefaultConfigUrl  = "https://cfg.rpchub.io/agg/default.json"
 	defaultPhishingDb = "https://cfg.rpchub.io/agg/scam-addresses.json"
 
 	_Config = &Config{
