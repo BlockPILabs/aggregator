@@ -1,7 +1,10 @@
 package plugins
 
 import (
+ 	"encoding/json"
+ 	"github.com/BlockPILabs/aggregator/aggregator"
 	"github.com/BlockPILabs/aggregator/client"
+	"github.com/BlockPILabs/aggregator/loadbalance"
 	"github.com/BlockPILabs/aggregator/log"
 	"github.com/BlockPILabs/aggregator/middleware"
 	"github.com/BlockPILabs/aggregator/rpc"
@@ -17,6 +20,15 @@ type HttpProxyMiddleware struct {
 	clientCreatedAt time.Time
 	clientRenew     time.Duration
 	mu              sync.Mutex
+}
+
+func containsInt(values []int, v int) bool {
+	for i := 0; i < len(values); i++ {
+		if values[i] == v {
+			return true
+		}
+	}
+	return false
 }
 
 func NewHttpProxyMiddleware() *HttpProxyMiddleware {
@@ -69,6 +81,22 @@ func (m *HttpProxyMiddleware) OnProcess(session *rpc.Session) error {
 		if statusCode/100 != 2 {
 			log.Error("error status code", "code", statusCode, "node", session.NodeName)
 			shouldDisableEndpoint = true
+		}
+
+		if err == nil {
+			body, _ := ctx.Response.BodyUncompressed()
+			if len(body) > 0 {
+				resp := &rpc.JsonRpcResponse{}
+				if json.Unmarshal(body, resp) == nil {
+					if resp.Error != nil {
+						if session.Node != nil && containsInt(session.Node.JsonRpcErrorCodeFailover, resp.Error.Code) {
+							loadbalance.TimeoutNode(session.Chain, session.Node.Name, time.Second*time.Duration(session.Cfg.RequestTimeout))
+							return aggregator.NewError(resp.Error.Code, resp.Error.Message)
+						}
+						return nil
+					}
+				}
+			}
 		}
 
 		if shouldDisableEndpoint {

@@ -5,6 +5,7 @@ import (
 	"github.com/BlockPILabs/aggregator/config"
 	"github.com/BlockPILabs/aggregator/log"
 	"sync"
+	"time"
 )
 
 var (
@@ -32,6 +33,15 @@ func NextNode(chain string) *aggregator.Node {
 	}
 
 	return nil
+}
+
+func TimeoutNode(chain string, nodeName string, d time.Duration) {
+	_mutex.Lock()
+	defer _mutex.Unlock()
+	selector := _selectors[chain]
+	if selector != nil {
+		selector.TimeoutNode(nodeName, d)
+	}
 }
 
 func LoadFromConfig() {
