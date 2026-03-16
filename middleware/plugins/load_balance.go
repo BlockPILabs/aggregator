@@ -42,6 +42,20 @@ func (m *LoadBalanceMiddleware) OnRequest(session *rpc.Session) error {
 	session.Node = node
 	//logger.Debug("load balance", "sid", session.SId(), "node", node.Name)
 	if ctx, ok := session.RequestCtx.(*fasthttp.RequestCtx); ok {
+		if session.AppliedNodeHeaders != nil {
+			for k := range session.AppliedNodeHeaders {
+				ctx.Request.Header.Del(k)
+			}
+			session.AppliedNodeHeaders = nil
+		}
+		if node.Headers != nil {
+			for k, v := range node.Headers {
+				if len(k) > 0 {
+					ctx.Request.Header.Set(k, v)
+				}
+			}
+			session.AppliedNodeHeaders = node.Headers
+		}
 		ctx.Request.SetRequestURI(node.Endpoint)
 	}
 	return nil
