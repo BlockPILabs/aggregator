@@ -25,6 +25,8 @@ type Session struct {
 
 	Tries            int
 	NodeName         string
+	Node             *aggregator.Node
+	AppliedNodeHeaders map[string]string
 	IsWriteRpcMethod bool
 
 	//Tx *types.Transaction

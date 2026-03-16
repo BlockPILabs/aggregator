@@ -8,6 +8,8 @@ type Node struct {
 	Weight   int64  `json:"weight"`
 	ReadOnly bool   `json:"read_only"`
 	Disabled bool   `json:"disabled"`
+	JsonRpcErrorCodeFailover []int `json:"jsonrpc_error_code_failover,omitempty"`
+	Headers map[string]string `json:"headers,omitempty"`
 }
 
 func (node *Node) Host() string {
